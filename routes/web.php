@@ -8,4 +8,7 @@ Route::get('/', function () {
 });
 
 Route::get('/webhooks', [WebhookController::class, 'index']);
+
 Route::post('/webhooks', [WebhookController::class, 'store']);
+
+Route::get('/webhooks/create', [WebhookController::class, 'create']);

@@ -1,14 +1,32 @@
 <h1>Create Webhook</h1>
-<form method="post" action="/webhooks">
+
+@if ($errors->any())
+    <div style="color: red;">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<form method="POST" action="/webhooks">
     @csrf
-    <label >webhook</label>
-    <input type="text" name="name">
 
-    <label>Destination ULR</label>
-    <input type="url" name="url">
+    <div>
+        <label>Webhook Name</label>
+        <input type="text" name="name" value="{{ old('name') }}">
+    </div>
 
-    <label>Secret</label>
-    <input type="password" name="secret">
+    <div>
+        <label>Destination URL</label>
+        <input type="url" name="url" value="{{ old('url') }}">
+    </div>
 
-    <button type="submit">Create webhook</button>
+    <div>
+        <label>Secret</label>
+        <input type="password" name="secret">
+    </div>
+
+    <button type="submit">Create Webhook</button>
 </form>

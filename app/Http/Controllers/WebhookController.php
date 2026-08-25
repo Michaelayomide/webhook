@@ -15,14 +15,22 @@ class WebhookController extends Controller
   $webhooks = Webhook::all();
   return view('webhooks.index', compact('webhooks'));
 }
+
 public function store()
 {
-    $webhook = new Webhook();
-    $webhook->name = request('name');
-    $webhook->url = request('url');
-    $webhook->secret = request('secret');
-    $webhook->save();
+    $validated = request()->validate([
+        'name'   => 'required|string|max:255',
+        'url'    => 'required|url',
+        'secret' => 'required|string|min:16',
+    ]);
+
+    Webhook::create($validated);
+
     return redirect('/webhooks');
 }
 
+public function create()
+{
+    return view('webhooks.create');
+}
 }
