@@ -10,3 +10,9 @@
     <P>Inactive</P>
   @endif
 @endforeach
+
+<form method="POST" action="/webhooks/{{ $webhook->id }}" style="display:inline;">
+    @csrf
+    @method('DELETE')
+    <button type="submit" onclick="return confirm('Delete this webhook?')">Delete</button>
+</form>

@@ -12,4 +12,9 @@ class Webhook extends Model
         'secret',
         'status',
     ];
-}      
+    
+public function logs()
+{
+    return $this->hasMany(WebhookLog::class);
+}
+}

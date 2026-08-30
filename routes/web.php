@@ -16,3 +16,7 @@ Route::get('/webhooks/create', [WebhookController::class, 'create']);
 Route::get('/webhooks/{webhook}/edit',[WebhookController::class,'edit']);
 
 Route::put('/webhooks/{webhook}',[WebhookController::class,'update']);
+
+Route::delete('/webhooks/{webhook}',[WebhookController::class,'destroy']);
+
+Route::post('/webhooks/{webhook}/test',[WebhookController::class,'testSend']);
