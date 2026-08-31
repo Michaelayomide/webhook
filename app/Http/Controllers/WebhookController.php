@@ -14,10 +14,10 @@ class WebhookController extends Controller
 // }
  public function index()
 {
-  $webhooks = Webhook::all();
-  return view('webhooks.index', compact('webhooks'));
-}
+    $webhooks = Webhook::with('logs')->get();
 
+        return view('webhooks.index', compact('webhooks'));
+}
 public function create()
 {
     return view('webhooks.create');
@@ -68,45 +68,39 @@ public function testSend(Webhook $webhook)
 {
     $startTime = microtime(true);
     $payload = [
-        'event' =>'user.updated',
-        'timestamp'=> now()->toIso8601String(),
-        'date'=> [
-            'id'=> 101,
-            'name'=> 'Test User',
-
+        'event'     => 'user.updated',
+        'timestamp' => now()->toIso8601String(),
+        'data'      => [
+            'id'   => 101,
+            'name' => 'Test User',
         ],
-        
-
     ];
-    try{
-        $response = Http::timeout(5)->post($webhook->url, $payload);
-        $responseTimeMs = (microtime(true)-$startTime) * 1000;
-    
-        WebhookLog::create([
-            'webhook_id' => $webhook->id,
-            'event' => 'user.updated',
-            'payload'=> json_encode($payload),
-            'response_time_ms'=> round($responseTimeMs, 2),
-            'is_successful'=> $response->successful(),
-            'error_message'=> null,
 
-        ]);
+    $statusCode   = null;
+    $isSuccessful = false;
+    $errorMessage = null;
 
-
-    }catch(\Exception $e){
-        $responseTimeMs = (microtime(true)-$startTime) * 1000;
-        WebhookLog::create([
-            'webhook_id' => $webhook->id,
-            'event' => 'user.updated',
-            'payload'=> json_encode($payload),
-            'status_code'=> null,
-            'response_time_ms'=> round($responseTimeMs, 2),
-            'is_successful'=> false,
-            'error_message'=> $e->getMessage(),
-
-        ]);
+    try {
+        $response     = Http::timeout(5)->post($webhook->url, $payload);
+        $statusCode   = $response->status();
+        $isSuccessful = $response->successful();
+    } catch (\Throwable $e) {
+        $errorMessage = $e->getMessage();
     }
-    return redirect('/webhooks');
 
+    $responseTimeMs = (microtime(true) - $startTime) * 1000;
+
+    WebhookLog::create([
+        'webhook_id'       => $webhook->id,
+        'event'            => 'user.updated',
+        'payload'          => json_encode($payload),
+        'status_code'      => $statusCode,
+        'response_time_ms' => round($responseTimeMs, 2),
+        'is_successful'    => $isSuccessful,
+        'error_message'    => $errorMessage,
+    ]);
+
+    return redirect('/webhooks');
 }
 
+}

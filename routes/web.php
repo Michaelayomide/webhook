@@ -20,3 +20,7 @@ Route::put('/webhooks/{webhook}',[WebhookController::class,'update']);
 Route::delete('/webhooks/{webhook}',[WebhookController::class,'destroy']);
 
 Route::post('/webhooks/{webhook}/test',[WebhookController::class,'testSend']);
+
+Route::post('/test-receiver', function () {
+    return response()->json(['message' => 'Webhook received!'], 200);
+});

@@ -10,19 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('webhook_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('webhook_id')->constrained()->onDelete('cascade');
-            $table->string('event');
-            $table->integer('status_code')->nullable();
-            $table->float('response_time')->nullable();
-            $table->boolean('is_successful')->default(false);
-            $table->text('error_message')->nullable();
-            $table->timestamps();
-
-        });
-    }
+{
+    Schema::create('webhook_logs', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('webhook_id')->constrained()->onDelete('cascade');
+        $table->string('event');
+        $table->json('payload')->nullable();
+        $table->integer('status_code')->nullable();
+        $table->float('response_time_ms')->nullable(); // <-- Column missing in DB
+        $table->boolean('is_successful')->default(false);
+        $table->text('error_message')->nullable();
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
