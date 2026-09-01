@@ -66,7 +66,6 @@ public function destroy(Webhook $webhook)
 
 public function testSend(Webhook $webhook)
 {
-    $startTime = microtime(true);
     $payload = [
         'event'     => 'user.updated',
         'timestamp' => now()->toIso8601String(),
@@ -76,31 +75,11 @@ public function testSend(Webhook $webhook)
         ],
     ];
 
-    $statusCode   = null;
-    $isSuccessful = false;
-    $errorMessage = null;
+    // Dispatch job to queue worker
+    ProcessWebhookDispatch::dispatch($webhook, $payload);
 
-    try {
-        $response     = Http::timeout(5)->post($webhook->url, $payload);
-        $statusCode   = $response->status();
-        $isSuccessful = $response->successful();
-    } catch (\Throwable $e) {
-        $errorMessage = $e->getMessage();
-    }
-
-    $responseTimeMs = (microtime(true) - $startTime) * 1000;
-
-    WebhookLog::create([
-        'webhook_id'       => $webhook->id,
-        'event'            => 'user.updated',
-        'payload'          => json_encode($payload),
-        'status_code'      => $statusCode,
-        'response_time_ms' => round($responseTimeMs, 2),
-        'is_successful'    => $isSuccessful,
-        'error_message'    => $errorMessage,
-    ]);
-
-    return redirect('/webhooks');
+    return redirect('/webhooks')->with('status', 'Webhook dispatch queued!');
+}
 }
 
-}
+
