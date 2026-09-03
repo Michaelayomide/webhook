@@ -29,13 +29,26 @@
                     <button type="submit" onclick="return confirm('Delete this webhook?')">Delete</button>
                 </form> |
 
-                <!-- Test Dispatch Form -->
-                <form method="POST" action="/webhooks/{{ $webhook->id }}/test" style="display:inline;">
-                    @csrf
-                    <button type="submit">Test Dispatch</button>
-                </form>
-            </div>
+                <!--  Dynamic Test Dispatch Form -->
 
+                <form method="POST" action="/webhooks/{{ $webhook->id }}/test" style="margin-top: 10px ;">
+                  @csrf
+                  <div style="margin-bottom :8px ;">
+                    <label><strong>Event Types</strong></label>
+                    <select name="event" style="padding: 4px;width: 100; max-width:300px;">
+                        <option value="user.updated">user.updated</option>
+                        <option value="order.created">order.created</option>
+                        <option value="payment.successful">payment.successful</option>
+                        <option value="invoice.payment_failed">invoice.payment_failed</option>
+                    </select>
+                 </div>  
+                 <div style="margin-bottom: 8px;">
+                    <label><strong>custom </strong></label><br>
+                    <textarea name="custom_data" rows="4" style="width: 100%; max-width: 400px; font-family: monospace;" placeholder='{"id": 101, "amount": 2500, "currency": "USD"}'>{"id": 101, "status": "active"}</textarea>
+                 </div>
+                 <button type="submit">Send Custom Dispatch</button>
+               </form>
+               
             <h4>Delivery Logs</h4>
             @if($webhook->logs->isEmpty())
                 <p><em>No dispatches logged yet. Click "Test Dispatch" to trigger one.</em></p>

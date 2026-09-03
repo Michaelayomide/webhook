@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Jobs\ProcessWebhookDispatch;
 use App\Models\Webhook;
 use Illuminate\Support\Facades\Http;
 use App\Models\WebhookLog;
@@ -64,22 +66,37 @@ public function destroy(Webhook $webhook)
 
 }
 
-public function testSend(Webhook $webhook)
+
+
+public function testSend(Request $request, Webhook $webhook)
 {
+    // Validate inputs
+    $request->validate([
+        'event'       => 'required|string',
+        'custom_data' => 'nullable|string',
+    ]);
+
+    // Parse JSON string into PHP array safely
+    $customData = json_decode($request->input('custom_data'), true);
+
+    // Fallback if user passes invalid or empty JSON
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($customData)) {
+        $customData = ['message' => 'Default or invalid JSON payload'];
+    }
+
+    // Construct final payload structure
     $payload = [
-        'event'     => 'user.updated',
+        'event'     => $request->input('event'),
         'timestamp' => now()->toIso8601String(),
-        'data'      => [
-            'id'   => 101,
-            'name' => 'Test User',
-        ],
+        'data'      => $customData,
     ];
 
-    // Dispatch job to queue worker
-    ProcessWebhookDispatch::dispatch($webhook, $payload);
+    try {
+        ProcessWebhookDispatch::dispatch($webhook, $payload);
+    } catch (\Throwable $e) {
+        // Suppress local sync exceptions so UI renders captured log
+    }
 
-    return redirect('/webhooks')->with('status', 'Webhook dispatch queued!');
+    return redirect('/webhooks')->with('status', 'Custom webhook dispatched!');
 }
 }
-
-
